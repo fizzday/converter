@@ -50,6 +50,7 @@ var typeForMysqlToGo = map[string]string{
 	"decimal":            "float64",
 	"binary":             "string",
 	"varbinary":          "string",
+	"json":               "json.RawMessage",
 }
 
 type Table2Struct struct {
@@ -172,6 +173,7 @@ func (t *Table2Struct) Run() error {
 			structName = t.camelCase(structName)
 		}
 
+		/*
 		switch len(tableName) {
 		case 0:
 		case 1:
@@ -180,6 +182,8 @@ func (t *Table2Struct) Run() error {
 			// 字符长度大于1时
 			tableName = strings.ToUpper(tableName[0:1]) + tableName[1:]
 		}
+		*/
+		tableName = t.camelCase(tableName)
 		depth := 1
 
 		if t.config.SeperatFile {
@@ -224,6 +228,11 @@ func (t *Table2Struct) Run() error {
 	var importContent string
 	if strings.Contains(structContent, "time.Time") {
 		importContent = "import \"time\"\n\n"
+	}
+
+	// 添加json类型支持
+	if strings.Contains(structContent, "json.RawMessage") {
+		importContent += "import \"encoding/json\"\n\n"
 	}
 
 	// 写入文件struct
